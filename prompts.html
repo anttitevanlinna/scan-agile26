@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Positioning with AI — Prompting Techniques</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.06);
+            --text: #f2f2f2;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.45);
+            --accent: #5e6ad2;
+            --accent-hover: #6e7ae2;
+            --green: #4cc38a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero */
+        .hero-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: -40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(
+                ellipse 60% 50% at 50% 40%,
+                rgba(94, 106, 210, 0.1),
+                transparent
+            );
+            pointer-events: none;
+        }
+
+        header {
+            position: relative;
+            padding: 80px 0 64px;
+        }
+
+        .event-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            padding: 6px 12px;
+            background: rgba(94, 106, 210, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(94, 106, 210, 0.2);
+        }
+
+        header h1 {
+            font-size: 40px;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            background: linear-gradient(
+                to right bottom,
+                #ffffff 30%,
+                rgba(255, 255, 255, 0.38)
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 540px;
+            line-height: 1.7;
+            letter-spacing: -0.01em;
+        }
+
+        header .by {
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        header .by a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        header .by a:hover {
+            color: var(--text);
+        }
+
+        /* Divider */
+        .divider { height: 1px; background: var(--border); }
+
+        /* Steps */
+        .steps {
+            padding: 64px 0;
+        }
+
+        .step {
+            padding: 48px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step:first-child {
+            padding-top: 0;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .step-num {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+        }
+
+        .step h2 {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        .step > p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            letter-spacing: -0.01em;
+            max-width: 580px;
+            margin-bottom: 20px;
+            padding-left: 46px;
+        }
+
+        .prompt-box {
+            margin-left: 46px;
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .prompt-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .prompt-box code {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.5;
+            letter-spacing: -0.01em;
+            font-style: italic;
+        }
+
+        .why {
+            margin-left: 46px;
+            font-size: 14px;
+            color: var(--text-tertiary);
+            line-height: 1.6;
+            max-width: 520px;
+        }
+
+        /* Principles */
+        .principles {
+            padding: 64px 0;
+        }
+
+        .principles h2 {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            margin-bottom: 32px;
+        }
+
+        .principle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .principle {
+            padding: 28px 24px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .principle h3 {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .principle p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Result */
+        .result {
+            padding: 64px 0;
+        }
+
+        .result h2 {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .result > p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 32px;
+            max-width: 540px;
+        }
+
+        .result-card {
+            padding: 36px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-left: 2px solid var(--accent);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .result-card .label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        .result-card .belief {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        .result-card .belief em {
+            font-style: normal;
+            color: var(--accent);
+        }
+
+        .result-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .result-link:hover {
+            color: var(--accent-hover);
+        }
+
+        /* Quadrant */
+        .quadrant-section {
+            padding: 64px 0;
+        }
+
+        .quadrant-section h2 {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .quadrant-section > p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 540px;
+            line-height: 1.7;
+        }
+
+        .quadrant {
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-tertiary);
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .quadrant .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .quadrant .dimmed {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Footer */
+        footer {
+            padding: 48px 0;
+        }
+
+        footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        footer a {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+
+        footer a:hover { color: var(--text); }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        @media (max-width: 640px) {
+            header h1 { font-size: 28px; }
+            header { padding: 48px 0 40px; }
+            .step > p, .prompt-box, .why { padding-left: 0; margin-left: 0; }
+            .principle-grid { grid-template-columns: 1fr; }
+            .quadrant { font-size: 10px; padding: 20px; }
+            .result-card .belief { font-size: 20px; }
+            .steps, .principles, .result, .quadrant-section { padding: 48px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero-wrapper">
+    <div class="hero-glow"></div>
+    <div class="container">
+        <header>
+            <div class="event-tag">Scan Agile 2026</div>
+            <h1>Positioning with AI: 8 prompting techniques that actually work</h1>
+            <p>How to use Claude Code as a strategic thinking partner to arrive at differentiated positioning — not generic consulting copy.</p>
+            <div class="by">Antti Tevanlinna &middot; <a href="https://www.linkedin.com/in/anttitevanlinna" target="_blank">LinkedIn</a> &middot; <a href="mailto:tevanlin@gmail.com">tevanlin@gmail.com</a></div>
+        </header>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="divider"></div>
+
+    <!-- Steps -->
+    <div class="steps">
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">01</div>
+                <h2>Dump raw context, not a brief</h2>
+            </div>
+            <p>Feed the AI everything: LinkedIn profile, business plan PDF, existing site. Don't pre-digest. Don't summarise. The AI finds patterns you've stopped seeing because you're too close.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Read this. Tell me what you learn."</code>
+            </div>
+            <p class="why">A brief tells the AI what you already think. Raw data lets it see what you've missed.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">02</div>
+                <h2>Apply a named framework</h2>
+            </div>
+            <p>Don't ask "help me with positioning." Ask the AI to apply a specific, named framework. Constraints produce better output than open-ended requests.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Seth Godin has the positioning statement that goes 'This product is for those who believe XX.' Know that? Apply it."</code>
+            </div>
+            <p class="why">Named frameworks give the AI a structure to fill, not a void to wander in. The output is immediately testable against the framework's own rules.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">03</div>
+                <h2>Fill the context window with competitors</h2>
+            </div>
+            <p>Fetch 4-6 competitor websites into the conversation. The AI sees the clustering that's invisible when you look at them one at a time. Every competitor saying "sustainable transformation" is a signal.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Let's do anti-branding. Fill up the context window with competitors. Think of [Gofore, CGI, Sofigate...]. Compare and contrast my style."</code>
+            </div>
+            <p class="why">The context window becomes your strategy room. The AI reasons across all competitors simultaneously — something a human can only do with post-it notes and a wall.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">04</div>
+                <h2>Push back with feeling, not logic</h2>
+            </div>
+            <p>The first positioning attempt will be too vague. Don't explain why it's wrong — just say what you're feeling, even loosely. Your instinct carries signal the AI can't generate alone.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Nah. I'm not feeling this. Something about actioning now."</code>
+            </div>
+            <p class="why">This is the most important prompt in the sequence. "Nah" plus a vague direction produces better positioning than a detailed brief ever could. You're the compass. The AI is the engine.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">05</div>
+                <h2>Apply the disagreement test</h2>
+            </div>
+            <p>A positioning belief must split the room. If a McKinsey partner would nod along, it's not sharp enough. If nobody would argue with it, it's a bumper sticker, not a position.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Would [competitor] disagree with this belief? If not, sharpen it."</code>
+            </div>
+            <p class="why">"Believe in progress" fails — who doesn't? "Believe the answer is in the doing, not the planning" passes — Deloitte's entire business model disagrees.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">06</div>
+                <h2>Map the quadrant</h2>
+            </div>
+            <p>Ask for a visual map of where competitors cluster and where the empty space is. The empty quadrant is the positioning. If you're alone there, check whether the economics prevent competitors from following.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Draw the differentiation as ASCII."</code>
+            </div>
+            <p class="why">A quadrant makes the abstract spatial. You can literally see the crowded zone and the open water. It also tests whether your positioning is truly differentiated or just differently worded.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">07</div>
+                <h2>Explore the blue ocean</h2>
+            </div>
+            <p>Once positioning is locked, ask the AI to reason about structural trends. What gives this position a tailwind? What makes it impossible for competitors to follow?</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"What's the blue ocean for me with AI agents and the future? Can you guess?"</code>
+            </div>
+            <p class="why">"Can you guess?" gives the AI permission to speculate and synthesise, not just summarise. It often produces the most differentiated insight in the session.</p>
+        </div>
+
+        <div class="step">
+            <div class="step-header">
+                <div class="step-num">08</div>
+                <h2>Make it real</h2>
+            </div>
+            <p>Only now build the site. The positioning does the structural work. The site is just the expression. Commit at checkpoints so you have the safety to be bold.</p>
+            <div class="prompt-box">
+                <div class="prompt-label">Prompt</div>
+                <code>"Make this happen."</code>
+            </div>
+            <p class="why">Three words. The positioning is done. The thinking is done. Now it's about doing — which, if the positioning is right, is exactly the point.</p>
+        </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Quadrant -->
+    <div class="quadrant-section">
+        <h2>The map we arrived at</h2>
+        <p>Every competitor clustered in the same quadrants. The empty space was the positioning.</p>
+        <div class="quadrant">
+<span class="dimmed">                PLANNING ◄───────────────────► DOING</span>
+<span class="dimmed">                     │                          │</span>
+<span class="dimmed">          INSTITUTION │                          │ INDIVIDUAL</span>
+<span class="dimmed">                     │</span>
+<span class="dimmed">                     │  McKinsey</span>
+<span class="dimmed">                     │  BCG</span>
+<span class="dimmed">                     │  Deloitte</span>
+<span class="dimmed">                     │</span>
+<span class="dimmed">                     │    CGI</span>
+<span class="dimmed">                     │    TietoEvry</span>
+<span class="dimmed">                     │    Gofore</span>
+<span class="dimmed">                     │    Sofigate</span>
+<span class="dimmed">                     │    Futurice</span>
+<span class="dimmed">                     │    Nitor</span>
+<span class="dimmed">                     │</span>
+<span class="dimmed">                     │</span>
+<span class="dimmed">                     │                     </span><span class="highlight">  ★ BOSSER</span>
+<span class="dimmed">                     │                          │</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Principles -->
+    <div class="principles">
+        <h2>Principles</h2>
+
+        <div class="principle-grid">
+            <div class="principle">
+                <h3>Context window = strategy room</h3>
+                <p>Fill it with competitors, your materials, frameworks. The AI reasons across all of it simultaneously.</p>
+            </div>
+            <div class="principle">
+                <h3>Your pushback is the best input</h3>
+                <p>"Nah" followed by a vague feeling produces better positioning than a detailed brief.</p>
+            </div>
+            <div class="principle">
+                <h3>Named frameworks beat open questions</h3>
+                <p>"Apply Godin" beats "help me position." Constraints produce creativity.</p>
+            </div>
+            <div class="principle">
+                <h3>The disagreement test is mandatory</h3>
+                <p>If everyone agrees with your belief statement, you're in the crowded quadrant.</p>
+            </div>
+            <div class="principle">
+                <h3>Don't polish before you find the edge</h3>
+                <p>Content before design. Belief before copy. The site is the expression, not the thinking.</p>
+            </div>
+            <div class="principle">
+                <h3>Commit early, commit often</h3>
+                <p>Checkpoints create safety to be bold. You can always go back, so you're never afraid to go forward.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Result -->
+    <div class="result">
+        <h2>What we built</h2>
+        <p>Starting from a LinkedIn profile and a business plan PDF, we arrived at differentiated positioning in one session.</p>
+
+        <div class="result-card">
+            <div class="label">Belief statement</div>
+            <div class="belief">For leaders who believe <em>the answer is in the doing,</em> not the planning.</div>
+        </div>
+
+        <a href="index.html" class="result-link">See the site we built &rarr;</a>
+    </div>
+
+</div>
+
+<div class="divider"></div>
+
+<footer>
+    <div class="container">
+        <p>Antti Tevanlinna &middot; Bosser Consulting</p>
+        <div class="footer-links">
+            <a href="mailto:tevanlin@gmail.com">Email</a>
+            <a href="https://www.linkedin.com/in/anttitevanlinna" target="_blank">LinkedIn</a>
+            <a href="index.html">bosser.fi</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
