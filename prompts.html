@@ -64,6 +64,32 @@
             padding: 80px 0 64px;
         }
 
+        /* QR Row */
+        .qr-row {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            padding: 48px 0 0;
+        }
+
+        .qr-item {
+            text-align: center;
+        }
+
+        .qr-item img {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+        }
+
+        .qr-item .qr-caption {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 0.02em;
+        }
+
         .event-tag {
             display: inline-block;
             font-size: 12px;
@@ -397,6 +423,23 @@
     </style>
 </head>
 <body>
+
+<div class="container">
+    <div class="qr-row">
+        <div class="qr-item">
+            <img src="feedback-qr.png" alt="Session feedback">
+            <div class="qr-caption">Session feedback</div>
+        </div>
+        <div class="qr-item">
+            <img src="bosser-qr.png" alt="Bosser site">
+            <div class="qr-caption">bosser.fi</div>
+        </div>
+        <div class="qr-item">
+            <img src="agents102-qr.png" alt="Agents 102">
+            <div class="qr-caption">Agents 102</div>
+        </div>
+    </div>
+</div>
 
 <div class="hero-wrapper">
     <div class="hero-glow"></div>
